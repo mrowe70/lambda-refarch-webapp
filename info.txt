@@ -1,0 +1,576 @@
+start linux  
+cat /etc/os-release 
+#apt installs
+sudo apt update
+sudo apt install -y software-properties-common
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+curl -sl https://deb.nodesource.com/setup_15.x| sudo -E bash -
+sudo apt install -y awscli nodejs gettext jq apt-transport-https \
+  ca-certificates gnupg-agent docker-ce docker-ce-cli containerd.io
+
+sudo npm install -g n
+
+wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+sudo ./sam-installation/install
+rm -rf sam-installation aws-sam-cli-linux-x86_64.zip
+
+# configure
+aws configure # keys are in downloads  mrowe_accessKeys.csv
+
+# get source
+mkdir ~/github
+cd ~/github
+git clone https://github.com/mrowe70/lambda-refarch-webapp
+cd ~/github/lambda-refarch-webapp
+sed -e 's/AWS_USER_POOLS_WEB_CLIENT_ID/$AWS_USER_POOLS_WEB_CLIENT_ID/; s/API_BASE_URL/$API_BASE_URL/; s/COGNITO_HOSTED_DOMAIN/$COGNITO_HOSTED_DOMAIN/; s/REDIRECT_URL/$REDIRECT_URL/;'  www/src/config.default.js > www/src/config.template.js
+
+cd /home/mrowe70/github/lambda-refarch-webapp
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+
+sudo sam build --use-container
+sam package --output-template-file packaged.yml --s3-bucket $DEPLOYMENT_BUCKET
+
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=192b632d82233a313f5cffd9505b590ff833d2f5 
+
+#run mostly local (auth via aws cognito)
+sudo docker run -p 8000:8000 amazon/dynamodb-local
+
+aws dynamodb create-table --table-name TodoTable --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --billing-mode PAY_PER_REQUEST --endpoint-url http://127.0.0.1:8000
+
+cd ~/github/lambda-refarch-webapp/
+sudo sam local start-api --env-vars todo-src/test/environment/mac.json
+
+cd ~/github/lambda-refarch-webapp/
+#export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+export REDIRECT_URL_LOCAL=http://localhost:8080
+export API_BASE_URL_LOCAL=http://127.0.0.1:8080
+export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
+export COGNITO_HOSTED_DOMAIN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoDomainName").OutputValue')
+
+export REDIRECT_URL=$REDIRECT_URL_LOCAL
+export API_BASE_URL=$API_BASE_URL_LOCAL
+
+cat  www/src/config.template.js | envsubst >  www/src/config.js
+
+cd www/src
+npm install  --legacy-peer-deps ls
+npm start
+
+cd ~/github/lambda-refarch-webapp/
+
+
+#https://code.visualstudio.com/
+#Download the .deb file
+#Open your downloads folder
+#Right Click the VS Code .deb file
+#Click install with Linux
+
+cd ~/github/lambda-refarch-webapp
+code .
+
+
+
+
+
+export API_BASE_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="TodoFunctionApi").OutputValue')
+export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
+export COGNITO_HOSTED_DOMAIN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoDomainName").OutputValue')
+export REDIRECT_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="AmplifyURL").OutputValue')
+
+export REDIRECT_URL=$REDIRECT_URL_CLOUD
+export API_BASE_URL=$API_BASE_URL_CLOUD
+cat  www/src/config.template.js | envsubst >  www/src/config.js
+
+
+--
+
+
+export API_BASE_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="TodoFunctionApi").OutputValue')
+export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
+export COGNITO_HOSTED_DOMAIN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoDomainName").OutputValue')
+export REDIRECT_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="AmplifyURL").OutputValue')
+
+export REDIRECT_URL=$REDIRECT_URL_CLOUD
+export API_BASE_URL=$API_BASE_URL_CLOUD
+cat  www/src/config.template.js | envsubst >  www/src/config.js
+
+
+
+
+-----
+cd /home/mrowe70/github/lambda-refarch-webapp
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=192b632d82233a313f5cffd9505b590ff833d2f5 
+
+export API_BASE_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="TodoFunctionApi").OutputValue')
+export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
+export COGNITO_HOSTED_DOMAIN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoDomainName").OutputValue')
+export REDIRECT_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="AmplifyURL").OutputValue')
+
+export REDIRECT_URL=$REDIRECT_URL_CLOUD
+export API_BASE_URL=$API_BASE_URL_CLOUD
+cat  www/src/config.template.js | envsubst >  www/src/config.cloud.js
+cat www/src/config.cloud.js > www/src/config.js
+
+#aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[]"
+
+git add www/src/config.js
+git commit -m 'Update frontend config'
+git push https://mrowe70:L%40tmein11@github.com/mrowe70/lambda-refarch-webapp.git
+
+export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
+aws amplify start-job --app-id $AMPLIFY_APP_ID --branch-name master --job-type RELEASE
+
+#aws amplify list-jobs --app-id $AMPLIFY_APP_ID --branch-name master 
+
+export AMPLIFY_STATUS=$(aws amplify list-jobs --app-id $AMPLIFY_APP_ID --branch-name master  | jq -r '.jobSummaries[0].status')
+while [ $AMPLIFY_STATUS = "RUNNING" ]
+do
+  sleep 10
+export AMPLIFY_STATUS=$(aws amplify list-jobs --app-id $AMPLIFY_APP_ID --branch-name master  | jq -r '.jobSummaries[0].status')
+    echo $AMPLIFY_STATUS
+done
+
+echo $REDIRECT_URL
+
+----
+Local:
+sudo docker run -p 8000:8000 amazon/dynamodb-local
+aws dynamodb create-table --table-name TodoTable --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --billing-mode PAY_PER_REQUEST --endpoint-url http://127.0.0.1:8000
+sudo sam local start-api --env-vars todo-src/test/environment/mac.json
+
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+
+export REDIRECT_URL_LOCAL=http://localhost:8080
+export API_BASE_URL_LOCAL=http://127.0.0.1:8080
+export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
+export COGNITO_HOSTED_DOMAIN=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoDomainName").OutputValue')
+
+export REDIRECT_URL=$REDIRECT_URL_LOCAL
+export API_BASE_URL=$API_BASE_URL_LOCAL
+
+cat  www/src/config.template.js | envsubst >  www/src/config.local.js
+cat www/src/config.local.js > www/src/config.js
+
+cd www/src
+npm start
+
+aws cloudformation delete-stack --stack-name $STACK_NAME
+
+--------
+
+error = Error: Network Error at e.exports (https://master.d25qg1jdb3t1hs.amplifyapp.com/static/js/2.5efcf6be.chunk.js:2:12378) at XMLHttpRequest.p.onerror (https://master.d25qg1jdb3t1hs.amplifyapp.com/static/js/2.5efcf6be.chunk.js:2:11348)
+
+
+-----
+
+
+cd /home/mrowe70/github/lambda-refarch-webapp
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=192b632d82233a313f5cffd9505b590ff833d2f5 
+
+aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[]"
+
+cp www/src/config.default.js www/src/config.js
+
+cd www/src
+npm install  --legacy-peer-deps ls
+npm start
+
+
+aws cloudformation delete-stack --stack-name $STACK_NAME
+
+for log_group in $(aws logs describe-log-groups --log-group-name-prefix '/aws/lambda/'$STACK_NAME --query "logGroups[*].logGroupName" --output text); do
+  echo "Removing log group ${log_group}..."
+  aws logs delete-log-group --log-group-name ${log_group}
+  echo
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+cd /home/mrowe70/github/lambda-refarch-webapp/www
+code . 
+cd src
+npm install  --legacy-peer-deps ls
+npm start
+
+-------
+npx create-react-app my-app
+cd my-app
+npm start
+
+cd /home/mrowe70/projects/react/my-app
+code .
+
+sudo apt install chromium
+sudo apt remove chromium
+
+------
+
+react envinronment
+sudo apt-get update
+sudo apt-get install curl gnupg -y
+curl -sl https://deb.nodesource.com/setup_13.x| sudo -E bash -
+curl -sl https://deb.nodesource.com/setup_15.x| sudo -E bash -
+sudo apt-get install -y nodejs
+sudo npm install -g n
+
+https://code.visualstudio.com/
+https://medium.com/@jacoboakley/web-development-with-a-chromebook-react-environment-setup-46173b1dc375
+
+npx create-react-app my-app
+cd my-app
+npm start
+
+
+cd ~/github
+git clone https://github.com/mrowe70/lambda-refarch-webapp
+
+
+
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg2 \
+    software-properties-common
+    
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+
+sudo apt-key fingerprint 0EBFCD88
+
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/debian \
+   $(lsb_release -cs) \
+   stable"
+   
+
+cat /etc/issue
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+sudo docker run hello-world
+
+sudo su 
+passwd mrowe70
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
+test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
+echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+
+
+get https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
+unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
+sudo ./sam-installation/install
+sam --version
+
+
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+#./deploy.sh
+
+cd /home/mrowe70/github/lambda-refarch-webapp
+sudo sam build --use-container
+
+export AWS_DEFAULT_REGION=us-east-1
+export STACK_NAME=lambda-refarch-webapp-1
+export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
+sam package \
+    --output-template-file packaged.yml \
+    --s3-bucket $DEPLOYMENT_BUCKET
+
+
+sudo docker run -p 8000:8000 amazon/dynamodb-local
+
+aws dynamodb create-table --table-name TodoTable --attribute-definitions AttributeName=id,AttributeType=S --key-schema AttributeName=id,KeyType=HASH --billing-mode PAY_PER_REQUEST --endpoint-url http://127.0.0.1:8000
+
+sudo sam local start-api --env-vars todo-src/test/environment/mac.json
+
+
+https://github.com/settings/tokens/new
+
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=192b632d82233a313f5cffd9505b590ff833d2f5 
+
+aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[]"
+
+cp www/src/config.default.js www/src/config.js
+
+cd www/src
+npm install  --legacy-peer-deps ls
+npm start
+
+
+aws cloudformation delete-stack --stack-name $STACK_NAME
+
+for log_group in $(aws logs describe-log-groups --log-group-name-prefix '/aws/lambda/'$STACK_NAME --query "logGroups[*].logGroupName" --output text); do
+  echo "Removing log group ${log_group}..."
+  aws logs delete-log-group --log-group-name ${log_group}
+  echo
+done
+
+
+---------------
+
+
+sudo apt-get update
+
+sudo apt-get install -y awscli
+
+sudo apt-get install -y gettext
+
+sudo apt-get install -y wget
+
+sudo apt-get install -y telnet
+
+sudo apt-get install dnsutils -y
+
+sudo apt-get install -y python
+
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+sudo python get-pip.py
+
+pip install awscli --upgrade --user
+
+sudo apt install -y groff
+
+sudo apt-get install make
+
+aws-cli/1.11.13 Python/3.5.3 Linux/4.14.74-07776-gac52e5f750c8 botocore/1.4.70
+
+curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
+unzip awscli-bundle.zip
+sudo ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+
+curl --silent --location "https://dl.google.com/go/go1.13.5.linux-amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/go /usr/local/go
+export PATH=$PATH:/usr/local/go/bin
+
+sudo apt-get install git
+
+mkdir -p ~/go/bin
+curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+sudo mv ~/go/bin/dep /usr/local/go/bin/
+rm -rf go
+
+git clone https://git-codecommit.us-we
+go get github.com/golang/example/hellost-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy
+
+go get git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git
+go get -v git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git
+
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
+git config --global url."ssh://git-codecommit.us-west-2.amazonaws.com:".insteadOf "https://git-codecommit.us-west-2.amazonaws.com/"
+git config --global  --unset credential.UseHttpPath
+git config --global  --unset credential.helper
+#git config --global  --unset url.ssh://git-codecommit.us-west-2.amazonaws.com:.insteadof
+git config --global user.email "matthew.rowe@ascensus.com"
+git config --global user.name "Matt Rowe"
+
+edit
+git status
+git add main.go
+git commit -m "changed file" 
+git push -u origin master
+
+git pull  origin master
+
+git checkout <file>
+git clone https://git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy
+go get git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git
+
+git clone ssh://git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy
+
+go get git-codecommit.us-west-2.amazonaws.com/v1/repos/MRoweTest.git
+cd /home/mrowe70/go/src/git-codecommit.us-west-2.amazonaws.com/v1/repos/MRoweTest.git/golangtests/yamlParsing
+
+go get git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git
+cd /home/mrowe70/go/src/git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git/k8sdeploy
+
+go get git-codecommit.us-west-2.amazonaws.com/v1/repos/DeploymentDescriptiors.git
+cd /home/mrowe70/go/src/git-codecommit.us-west-2.amazonaws.com/v1/repos/DeploymentDescriptiors.git
+
+
+
+
+
+u529.acceptance.yml
+u529.yml
+
+
+
+go build -o main
+zip codepipeline.zip main
+aws s3 cp codepipeline.zip s3://matt-us-west-2-sor-change/
+aws s3 ls s3://matt-us-west-2-sor-change/codepipeline.zip
+aws lambda update-function-code --function-name makePipeline1-Pipeline-1J-LambdaKubernetesDeployme-WY8YI4WI1BM2 --s3-bucket matt-us-west-2-sor-change --s3-key codepipeline.zip --publish
+
+
+aws lambda update-function-code --function-name DeleteMe1 --s3-bucket matt-us-west-2-sor-change --s3-key codepipeline.zip --publish
+
+export AWS_REGION=us-west-2 
+export AWS_ACCESS_KEY_ID=AKIAIHLDQHCP67T7TLZA
+export AWS_SECRET_ACCESS_KEY=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
+
+AWS_ACCESS_KEY
+AWS_SECRET_KEY
+AWS_SESSION_TOKEN
+AWS_SECURITY_TOKEN
+
+
+
+
+aws s3api list-objects --bucket mrowe-public-us-west-w2
+aws s3api list-objects --bucket matt-us-west-2-sor-change
+aws s3api list-objects --bucket codepipeline-us-west-2-520134167260
+
+kubectl get deployments
+kubectl get jobs
+kubectl get pods
+kubectl get services
+
+kubectl delete deployment 
+kubectl delete job 
+
+if os.Getenv("DEBUG") == "FAKE" {
+
+
+kubectl logs 
+
+
+mrowe-source-resized-us-west-2
+mrowe-source-us-west-2
+
+
+eksctl create nodegroup --cluster=acceptance-2 --name=node-group-1
+eksctl delete nodegroup --cluster=acceptance-2 --name=node-group-1
+
+aws s3 cp s3://matt-us-west-2-sor-change/  ~/dep --include "deployments/*"
+
+kubectl apply -f ~/dep
+kubectl delete deployment 
+kubectl delete job 
+
+kubectl get pods
+
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.deployments.yml   ~/dep 
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.services.yml   ~/dep 
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.jobs.yml   ~/dep 
+
+kubectl delete -f ~/dep
+
+kubectl get deployments
+kubectl get services
+kubectl get jobs
+
+kubectl apply -f ~/dep
+
+cd /home/mrowe70/go/src/git-codecommit.us-west-2.amazonaws.com/v1/repos/DeploymentDescriptiors.git
+
+git pull  origin master
+
+
+git add main.go
+git commit -m "changed file" 
+git push -u origin master
+
+
+aws s3 cp u529.deployments.yml s3://matt-us-west-2-sor-change/
+aws s3 cp u529.jobs.yml s3://matt-us-west-2-sor-change/
+aws s3 cp u529.services.yml s3://matt-us-west-2-sor-change/
+
+kubectl get pods
+kubectl logs
+
+kubectl describe pod u529-metadata-service-dy8mqaxo-585785b8bf-6vphr
+
+cd /home/mrowe70/go/src/git-codecommit.us-west-2.amazonaws.com/v1/repos/AcceptanceK8sLambdaDeploy.git/k8sdeploy
+
+
+
+kubectl exec -it u529-metadata-service-2s5d2qem-9856bdc64-4b5g9 sh
+kubectl get service monolith-persistence-2s5d2qem
+
+public_dns=$(kubectl get service monolith-persistence-2s5d2qem -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+
+
+
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.deployments.yml   ~/dep 
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.services.yml   ~/dep 
+aws s3 cp s3://matt-us-west-2-sor-change/deployments/u529.jobs.yml   ~/dep 
+
+aws s3 cp s3://matt-us-west-2-sor-change/deployments ~/dep --recursive
+
+kubectl delete -f ~/dep
+kubectl delete -f 
+
+
+kubectl get deployments
+kubectl get services
+kubectl get jobs
+kubectl get pods
+
+
+
+--cluodformation
+1/20/2020
+https://github.com/aws-samples/aws-kube-codesuite 
+
+Create Stack
+https://s3-us-west-2.amazonaws.com/aws-eks-codesuite/aws-refarch-codesuite-kubernetes.yaml
+Stack name:
+Codesuite-Demo
+
+Parameters
+The name of your EKS cluster
+
+TemplateBucket
+aws-eks-codesuite
+
+BranchName
+master
+
+DeploymentName
+codesuite-demo
+
+other parameters
+Name
+codesuite-demo
+
+
+imp  UII0/UII0@//$orcl_dns_name:1521/ORCL FILE=expdat.dmp IGNORE=false
+
+imp  UII0/UII0@//$orcl_dns_name:1521/ORCL FILE=expdat.dmp IGNORE=false > sql.out  2>&1
+
+
+
+-----------
