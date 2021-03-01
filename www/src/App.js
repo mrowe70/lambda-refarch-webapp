@@ -16,6 +16,9 @@ function App() {
   const [idToken, setIdToken] = useState('');
   const [toDos, setToDos] = useState([]);
 
+  console.log('Testing from local 1');
+  console.log('Testing from cloud');
+
   useEffect(() => {
     getIdToken();
     if (idToken.length > 0) {
