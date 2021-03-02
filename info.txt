@@ -35,7 +35,7 @@ export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
 sudo sam build --use-container
 sam package --output-template-file packaged.yml --s3-bucket $DEPLOYMENT_BUCKET
 
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=192b632d82233a313f5cffd9505b590ff833d2f5 
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=XXXX
 
 #run mostly local (auth via aws cognito)
 sudo docker run -p 8000:8000 amazon/dynamodb-local
