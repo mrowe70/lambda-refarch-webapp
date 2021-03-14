@@ -16,8 +16,8 @@ function App() {
   const [idToken, setIdToken] = useState('');
   const [toDos, setToDos] = useState([]);
 
-  console.log('Testing from local 1');
-  console.log('Testing from cloud');
+  console.log("config.redirect_url ", config.redirect_url);
+  console.log("config.api_base_url ", config.api_base_url);
 
   useEffect(() => {
     getIdToken();
@@ -33,6 +33,16 @@ function App() {
     window.location.href = config.redirect_url;
     return Promise.reject(error);
   });
+
+  axios.interceptors.request.use(request => {
+    console.log('Logging axios', JSON.stringify(request, null, 2))
+    return request
+  })
+  
+  
+
+
+
 
   function onDismiss() {
     setAlertVisible(false);
@@ -61,9 +71,10 @@ function App() {
   };
 
   const getAllTodos = async () => {
-    const result = await axios({
-      url: `${config.api_base_url}/item/`,
-      headers: {
+    const result = await axios(
+      {
+        url: `${config.api_base_url}/item/`,
+        headers: {
         Authorization: idToken
       }
     }).catch(error => {
@@ -78,7 +89,7 @@ function App() {
       console.log(result.data.Items);
       setToDos(result.data.Items);
     }
-  };
+   };
 
   const addToDo = async (event) => {
     const newToDoInput = document.getElementById('newToDo');

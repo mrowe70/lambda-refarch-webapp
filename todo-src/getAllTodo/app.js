@@ -8,13 +8,20 @@ const {metricScope, Unit} = require("aws-embedded-metrics")
 const DDB = new AWS.DynamoDB({apiVersion: "2012-10-08"})
 
 // environment variables
-const {TABLE_NAME, ENDPOINT_OVERRIDE, REGION} = process.env
+const {TABLE_NAME, ENDPOINT_OVERRIDE, REGION, ACCESS_KEY_ID, SECRET_ACCESS_KEY, MOCK_COGNITO_USERNAME}  = process.env
+
 const options = {region: REGION}
 AWS.config.update({region: REGION})
 
 if (ENDPOINT_OVERRIDE !== "") {
     options.endpoint = ENDPOINT_OVERRIDE
 }
+if (ACCESS_KEY_ID !== "") {
+    options.accessKeyId = ACCESS_KEY_ID
+    options.secretAccessKey = SECRET_ACCESS_KEY
+}
+
+console.log("DocumentClient  ", JSON.stringify(options));
 
 const docClient = new AWS.DynamoDB.DocumentClient(options)
 // response helper
@@ -29,7 +36,11 @@ function getCognitoUsername(event){
     let authHeader = event.requestContext.authorizer;
     if (authHeader !== null)
     {
-        return authHeader.claims["cognito:username"];
+        if (MOCK_COGNITO_USERNAME !== "") {
+            return MOCK_COGNITO_USERNAME
+        }else{
+            return authHeader.claims["cognito:username"];
+        }
     }
     return null;
 
@@ -48,8 +59,13 @@ function getRecords(username) {
         }
     }
 
+    console.log("put 1 ", JSON.stringify(params));
+    //console.log("put 2 ", JSON.stringify(item_body));
+
     return docClient.query(params)
 }
+
+console.log("event start!!!!!!!!");
 
 // Lambda Handler
 exports.getAllToDoItem =
@@ -58,13 +74,11 @@ exports.getAllToDoItem =
             metrics.setNamespace('TodoApp')
             metrics.putDimensions({Service: "getAllTodo"})
             metrics.setProperty("RequestId", context.requestId)
-
             try {
                 let username = getCognitoUsername(event);
                 let data = await getRecords(username).promise()
                 metrics.putMetric("Success", 1, Unit.Count)
                 return response(200, data)
-
             } catch (err) {
                 metrics.putMetric("Error", 1, Unit.Count)
                 console.error(err.message);

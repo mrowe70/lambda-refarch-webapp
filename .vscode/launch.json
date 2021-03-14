@@ -1,12 +1,16 @@
 {
     "version": "0.2.0",
     "configurations": [
-    {
-        "type": "chrome",
-        "request": "launch",
-        "name": "Launch Chrome",
-        "url": "http://localhost:8080",
-        "webRoot": "${workspaceFolder}"
-    }
+      {
+        "name": "addTodo",
+        "type": "node",
+        "request": "attach",
+        "address": "localhost",
+        "port": 9999,
+        "localRoot": "${workspaceRoot}/todo-src/addTodo",
+        "remoteRoot": "/var/task",
+        "protocol": "inspector",
+        "stopOnEntry": false
+      }
     ]
 }

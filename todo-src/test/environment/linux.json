@@ -1,0 +1,32 @@
+{
+    "GetAllTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    },
+    "CompleteTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    },
+    "AddTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    },
+    "DeleteTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    },
+    "GetTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    },
+    "UpdateTodoFunction": {
+        "ENDPOINT_OVERRIDE": "http://172.17.0.1:8000",
+        "MOCK_COGNITO_USERNAME" : "mrowe70@gmail.com",
+        "TABLE_NAME": "TodoTable1"
+    }
+}
