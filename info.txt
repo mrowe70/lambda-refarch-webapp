@@ -1,7 +1,7 @@
 
 date ; sudo sam build --use-container  --cached ; date
 sam package --output-template-file packaged.yml --s3-bucket $DEPLOYMENT_BUCKET
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 date ; sudo sam build --cached ; date
 
@@ -186,7 +186,7 @@ export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
 
 sudo sam build --use-container
 sam package --output-template-file packaged.yml --s3-bucket $DEPLOYMENT_BUCKET
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 export REDIRECT_URL=$(aws cloudformation describe-stacks \
         --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="AmplifyURL").OutputValue')
@@ -261,7 +261,7 @@ export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
 sudo sam build --use-container
 sam package --output-template-file packaged.yml --s3-bucket $DEPLOYMENT_BUCKET
 
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 
 #run mostly local (auth via aws cognito)
@@ -365,7 +365,7 @@ export AWS_DEFAULT_REGION=us-east-1
 export STACK_NAME=lambda-refarch-webapp-1
 export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
 
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 export API_BASE_URL_CLOUD=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="TodoFunctionApi").OutputValue')
 export AWS_USER_POOLS_WEB_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $STACK_NAME | jq -r '.Stacks[0].Outputs[] | select(.OutputKey=="CognitoClientID").OutputValue')
@@ -432,7 +432,7 @@ export AWS_DEFAULT_REGION=us-east-1
 export STACK_NAME=lambda-refarch-webapp-1
 export DEPLOYMENT_BUCKET=mrowe-lambda-refarch-webapp
 
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[]"
 
@@ -568,7 +568,7 @@ sudo sam local start-api --env-vars todo-src/test/environment/mac.json
 
 https://github.com/settings/tokens/new
 
-sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=
+sam deploy     --template-file packaged.yml     --stack-name $STACK_NAME     --capabilities CAPABILITY_IAM --parameter-overrides Repository=https://github.com/mrowe70/lambda-refarch-webapp/ OauthToken=$GITHUB_TOKEN
 
 aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[]"
 
