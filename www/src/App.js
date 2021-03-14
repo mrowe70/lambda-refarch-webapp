@@ -4,7 +4,7 @@ import axios from 'axios';
 import ToDo from './ToDo'
 
 import './App.css';
-import logo from './aws.png';
+import logo from './rosie.jpg';
 
 import config from './config';
 
@@ -164,9 +164,9 @@ function App() {
         <Jumbotron>
           <Row>
             <Col md="6" className="logo">
-              <h1>Serverless Todo</h1>
-              <p>This is a demo that showcases AWS serverless.</p>
-              <p>The application is built using the SAM CLI toolchain, and uses AWS Lambda, Amazon DynamoDB, and Amazon API Gateway for API services and Amazon Cognito for identity.</p>
+              <h1>Card Guys</h1>
+              <p>Inventory, rate and value your trading cards.</p>
+              <p>Buy, sell, and trade.</p>
 
               <img src={logo} alt="Logo" />
             </Col>
