@@ -17,7 +17,7 @@ function ToDo({ toDos, addToDo, deleteToDo, completeToDo }) {
           <Form inline>
             <FormGroup>
               <Label for="newToDo" hidden>ToDo</Label>
-              <Input type="text" name="todo" id="newToDo" placeholder="new item" />
+              <Input type="text" name="todo" id="newToDo" placeholder="new card " />
             </FormGroup>
             <Button onClick={addToDo} color="primary" className="ml-1">Add</Button>
           </Form>

@@ -56,7 +56,6 @@ cat  www/src/config.template.js | envsubst >  www/src/config.js
 
 git add www/src/config.js
 git commit -m 'Update frontend config'
-git push https://mrowe70:X%40XXXX@github.com/mrowe70/lambda-refarch-webapp.git
 git push https://github.com/mrowe70/lambda-refarch-webapp.git
 
 export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
@@ -143,7 +142,6 @@ cat  www/src/config.template.js | envsubst >  www/src/config.js
 
 git add www/src/config.js
 git commit -m 'Update frontend config'
-git push https://mrowe70:X%40XXXX@github.com/mrowe70/lambda-refarch-webapp.git
 git push https://github.com/mrowe70/lambda-refarch-webapp.git
 
 export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
@@ -202,7 +200,6 @@ cat  www/src/config.template.js | envsubst >  www/src/config.js
 
 git add www/src/config.js
 git commit -m 'Update frontend config'
-git push https://mrowe70:X%40XXXX@github.com/mrowe70/lambda-refarch-webapp.git
 git push https://github.com/mrowe70/lambda-refarch-webapp.git
 
 export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
@@ -319,7 +316,6 @@ cat  www/src/config.template.js | envsubst >  www/src/config.js
 git add www/src/config.js
 git add www/src/App.js
 git commit -m 'Update frontend config'
-git push https://mrowe70:X%40XXXX@github.com/mrowe70/lambda-refarch-webapp.git
 git push https://github.com/mrowe70/lambda-refarch-webapp.git
 
 export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
@@ -387,7 +383,6 @@ git config --global user.name "Matthew Rowe"
 
 git add www/src/config.js
 git commit -m 'Update frontend config'
-git push https://mrowe70:X%40XXXX@github.com/mrowe70/lambda-refarch-webapp.git
 git push https://github.com/mrowe70/lambda-refarch-webapp.git
 
 export AMPLIFY_APP_ID=$(aws amplify list-apps | jq -r '.apps[0].appId')
